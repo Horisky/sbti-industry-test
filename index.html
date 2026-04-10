@@ -54,6 +54,13 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;backg
 .r-tag{position:absolute;top:20px;right:20px;font-size:10px;color:rgba(255,255,255,.06);letter-spacing:2px;writing-mode:vertical-rl}
 .btn-r{background:transparent;border:1px solid rgba(var(--nr),.35);color:var(--neon);font-size:14px;padding:12px 32px;border-radius:30px;cursor:pointer;letter-spacing:2px;transition:all .3s;font-family:inherit}
 .btn-r:active{background:rgba(var(--nr),.1);border-color:var(--neon)}
+.r-link{width:100%;max-width:360px;margin:0 auto 20px;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 14px;cursor:pointer;transition:all .3s}
+.r-link:active{border-color:rgba(var(--nr),.4);background:rgba(var(--nr),.06)}
+.r-link-url{flex:1;font-size:12px;color:var(--sub);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
+.r-link-btn{flex-shrink:0;font-size:11px;color:var(--neon);background:rgba(var(--nr),.1);border:1px solid rgba(var(--nr),.25);border-radius:6px;padding:4px 12px;letter-spacing:1px;font-family:inherit;cursor:pointer;transition:all .3s}
+.r-link-btn:active{background:rgba(var(--nr),.2)}
+.r-link-toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(var(--nr),.9);color:#fff;font-size:13px;padding:8px 24px;border-radius:20px;opacity:0;transition:all .35s;pointer-events:none;z-index:1000;letter-spacing:1px}
+.r-link-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .r-dt,.r-db{position:absolute;width:200px;height:200px;border-radius:50%;filter:blur(80px);opacity:.12;pointer-events:none}
 .r-dt{top:-60px;left:-60px;background:var(--neon)}
 .r-db{bottom:-60px;right:-60px;background:#06b6d4}
@@ -94,7 +101,12 @@ body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;backg
 <div class="r-div"></div>
 <div class="r-desc" id="rd"></div>
 <div class="r-share">截图发朋友圈，看看你的朋友是什么人格</div>
+<div class="r-link" id="r-link" onclick="copyLink()">
+<span class="r-link-url" id="r-link-url"></span>
+<span class="r-link-btn">复制链接</span>
+</div>
 <button class="btn-r" onclick="goHome()">重新测试</button>
+<div class="r-link-toast" id="toast">链接已复制</div>
 </div></div>
 <script>
 /* === CHARACTER DRAWING === */
@@ -558,7 +570,21 @@ function showR(){
   document.getElementById('rt').textContent=r.title;
   document.getElementById('rd').textContent=r.desc;
   drawChar(document.getElementById('cc'),d.chars[ci],d.color);
+  document.getElementById('r-link-url').textContent=window.location.href.split('?')[0].split('#')[0];
   show('result-screen');
+}
+
+function copyLink(){
+  var url=window.location.href.split('?')[0].split('#')[0];
+  var text=url;
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(showToast).catch(fallbackCopy);
+  }else{fallbackCopy();}
+  function fallbackCopy(){
+    var ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();try{document.execCommand('copy');showToast();}catch(e){}document.body.removeChild(ta);
+  }
+  function showToast(){var t=document.getElementById('toast');t.classList.add('show');setTimeout(function(){t.classList.remove('show');},1800);}
 }
 
 function goHome(){setN('#a855f7','168,85,247');show('home-screen');}
